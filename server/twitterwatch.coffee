@@ -28,10 +28,17 @@ twit.stream 'statuses/filter', {track: hashtag}, (stream) ->
       console.log 'WEIRD TWIT!', data
       return
     console.log "Twitter! @#{data.user.screen_name} #{data.text}"
+        #linkify hashtags
     text = data.text.replace /(^|\s)\#(\w+)\b/g, \
       '$1<a href="https://twitter.com/search?q=%23$2" target="_blank">#$2</a>'
+    #linkify URLs
+    text = data.text.replace /(^|\s)(http?:\/\/[\da-z\.-]+\.[a-z\.]{2,6}[\/\w\.-]*)/g, \
+      '$1<a href="$2" target="_blank">$2</a>'
+    #linkify usernames
+    text = data.text.replace  /(^|\s)@([A-Za-z0-9_]{1,15})(?![.A-Za-z])/g, \
+      '$1<a href="https://twitter.com/$2" target="_blank">@$2</a>'
     Meteor.call 'newMessage',
       nick: 'via twitter'
       action: 'true'
-      body: "<a href='https://twitter.com/#{data.user.screen_name}/status/#{data.id_str}' title='#{data.user.name}' target='_blank'>@#{data.user.screen_name}</a> says: #{text}"
+      body: "<a href='https://twitter.com/#{data.user.screen_name}'>@#{data.user.screen_name}</a> <a href='https://twitter.com/#{data.user.screen_name}/status/#{data.id_str}' target='_blank'>says:</a> #{text}"
       bodyIsHtml: true
